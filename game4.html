@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дневник выжившего — Полиглот</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=Special+Elite&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #080605;
+            color: #a89b8c;
+            font-family: 'EB Garamond', serif;
+            overflow-x: hidden;
+            position: relative;
+            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: -2;
+            background: 
+                radial-gradient(circle at 50% 30%, rgba(40, 30, 20, 0.4), transparent 70%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+        }
+        
+        body::after {
+            content: ''; position: fixed; inset: 0; z-index: 100; pointer-events: none;
+            background: 
+                repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 4px),
+                radial-gradient(circle, transparent 40%, rgba(0,0,0,0.9) 100%);
+            opacity: 0.95;
+        }
+
+        .header {
+            position: relative; z-index: 10;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 30px 60px;
+            border-bottom: 1px solid rgba(168, 155, 140, 0.08);
+            background: linear-gradient(to bottom, rgba(8,6,5,0.9), transparent);
+        }
+        .logo {
+            font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700;
+            letter-spacing: 3px; color: #e8e0d5; text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(139,0,0,0.5);
+        }
+        .logo span { color: #8b0000; }
+        .nav { display: flex; gap: 36px; }
+        .nav a {
+            text-decoration: none; font-family: 'Inter', sans-serif;
+            font-size: 11px; font-weight: 600; letter-spacing: 2px;
+            color: #7a6d60; text-transform: uppercase; transition: all 0.3s;
+            position: relative;
+        }
+        .nav a:hover, .nav a.active { color: #e8e0d5; }
+        .nav a.active::after {
+            content: ''; position: absolute; bottom: -8px; left: 0; right: 0;
+            height: 1px; background: #8b0000; box-shadow: 0 0 10px #8b0000;
+        }
+
+        .back-btn {
+            position: fixed; top: 100px; left: 40px; z-index: 500;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 50px; height: 50px; 
+            background: #110d0b;
+            border: 1px solid rgba(139,0,0,0.4); 
+            border-radius: 50%;
+            color: #a89b8c; 
+            font-size: 24px;
+            text-decoration: none;
+            transition: all 0.3s ease; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        .back-btn::before { content: '←'; font-family: 'Inter', sans-serif; transition: transform 0.3s; }
+        .back-btn:hover { color: #fff; border-color: #8b0000; background: #8b0000; box-shadow: 0 0 25px rgba(139,0,0,0.6); }
+        .back-btn:hover::before { transform: translateX(-5px); }
+
+        .page-header {
+            position: relative; z-index: 10;
+            text-align: center; padding: 80px 20px 40px;
+        }
+        .page-header h1 {
+            font-family: 'Cinzel', serif; font-size: 72px; font-weight: 600;
+            color: #e8e0d5; text-transform: uppercase; letter-spacing: 2px;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.9); margin-bottom: 20px;
+        }
+        .page-header p {
+            font-family: 'Special Elite', monospace; font-size: 14px; color: #8b0000;
+            letter-spacing: 4px; text-transform: uppercase;
+        }
+
+        .task-container {
+            position: relative; z-index: 10;
+            max-width: 1000px; margin: 0 auto; padding: 0 40px 120px;
+            flex: 1;
+        }
+
+        .task-desc {
+            background: #110d0b; border-left: 4px solid #8b0000;
+            padding: 30px; margin-bottom: 30px;
+            box-shadow: 15px 15px 40px rgba(0,0,0,0.6); position: relative;
+        }
+        .task-desc h2 { font-family: 'Cinzel', serif; font-size: 24px; color: #e8e0d5; margin-bottom: 10px; }
+        .task-desc p { font-family: 'Special Elite', monospace; font-size: 14px; line-height: 1.8; color: #a89b8c; }
+
+        .terminal-panel {
+            background: #0a0806; border: 1px solid #2a211b; border-radius: 4px;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 20px 50px rgba(0,0,0,0.8); overflow: hidden;
+        }
+        .terminal-header {
+            background: #110d0b; padding: 15px 20px; border-bottom: 1px solid #2a211b;
+            font-family: 'Special Elite', monospace; font-size: 12px; color: #8b0000;
+            letter-spacing: 2px; text-transform: uppercase;
+            display: flex; justify-content: space-between;
+        }
+
+        .game-container {
+            position: relative;
+            padding: 60px 40px;
+            display: flex; flex-direction: column; align-items: center;
+            background: #050403;
+            min-height: 500px;
+        }
+
+        .game-ui {
+            width: 100%; max-width: 800px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 40px;
+            font-family: 'Special Elite', monospace;
+            font-size: 20px; color: #e8e0d5;
+            border-bottom: 1px dashed #3a2e26; padding-bottom: 20px;
+        }
+
+        .ui-item span { color: #8b0000; font-weight: bold; }
+
+        .timer {
+            font-size: 28px; color: #c9a961;
+            text-shadow: 0 0 10px rgba(201,169,97,0.5);
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        .timer.low { color: #ff0000; text-shadow: 0 0 15px rgba(255,0,0,0.8); }
+
+        .word-card {
+            width: 100%; max-width: 600px;
+            background: #110d0b;
+            border: 2px solid #3a2e26;
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.5);
+            transition: all 0.3s;
+        }
+        .word-card:hover { border-color: #8b0000; }
+
+        .lang-label {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
+            color: #8b0000; letter-spacing: 3px; text-transform: uppercase;
+            background: #0a0806; padding: 0 15px;
+        }
+
+        .word-text {
+            font-size: 64px; font-weight: 700; color: #e8e0d5;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        .word-text.jp { font-family: 'Noto Sans JP', sans-serif; }
+        .word-text.kr { font-family: 'Noto Sans KR', sans-serif; }
+        .word-text.zh { font-family: 'Noto Sans SC', sans-serif; }
+        .word-text.en { font-family: 'Cinzel', serif; }
+
+        .input-area {
+            width: 100%; max-width: 500px;
+            display: flex; gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            flex: 1;
+            background: #0a0806;
+            border: 2px solid #3a2e26;
+            color: #e8e0d5;
+            padding: 15px 20px;
+            font-family: 'Inter', sans-serif;
+            font-size: 18px;
+            outline: none;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        .input-field:focus { border-color: #8b0000; }
+        .input-field:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .submit-btn {
+            background: #8b0000;
+            border: none;
+            color: #fff;
+            padding: 0 30px;
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .submit-btn:hover { background: #a00000; box-shadow: 0 0 20px rgba(139,0,0,0.6); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .message {
+            font-family: 'Special Elite', monospace;
+            font-size: 18px; height: 24px;
+            font-weight: bold; transition: all 0.3s;
+        }
+        .message.success { color: #00ff00; text-shadow: 0 0 10px rgba(0,255,0,0.5); }
+        .message.error { color: #ff0000; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
+
+        .overlay-screen {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 1s;
+            z-index: 30;
+        }
+        .overlay-screen.active { opacity: 1; visibility: visible; }
+        .overlay-screen h2 {
+            font-family: 'Cinzel', serif; font-size: 64px;
+            color: #8b0000; text-transform: uppercase;
+            text-shadow: 0 0 30px rgba(139,0,0,0.8); margin-bottom: 20px;
+            letter-spacing: 5px;
+        }
+        .overlay-screen p {
+            font-family: 'Special Elite', monospace; font-size: 20px; 
+            color: #a89b8c; margin-bottom: 20px; text-align: center;
+        }
+        .overlay-screen .score-display {
+            font-family: 'Cinzel', serif; font-size: 48px; color: #e8e0d5;
+            margin-bottom: 40px;
+        }
+        .overlay-screen button {
+            background: #110d0b; border: 1px solid #8b0000; color: #e8e0d5;
+            padding: 15px 40px; font-family: 'Cinzel', serif; font-size: 18px;
+            font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .overlay-screen button:hover { background: #8b0000; box-shadow: 0 0 20px rgba(139,0,0,0.6); }
+
+        .ticker {
+            position: relative; z-index: 10; background: #8b0000; color: #0a0806;
+            padding: 12px 0; overflow: hidden; white-space: nowrap;
+            border-top: 1px solid #ff3333; border-bottom: 1px solid #ff3333; margin-top: 60px;
+        }
+        .ticker-content {
+            display: inline-block; animation: ticker 20s linear infinite;
+            font-family: 'Special Elite', monospace; font-size: 14px; font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase;
+        }
+        .ticker-item { display: inline-block; padding: 0 30px; }
+        .ticker-item::before { content: '⚠'; margin-right: 10px; }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .footer {
+            position: relative; z-index: 10; text-align: center; padding: 60px;
+            border-top: 1px solid rgba(168,155,140,0.08); background: #050403;
+        }
+        .footer-logo { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700; color: #e8e0d5; margin-bottom: 20px; }
+        .footer p { font-family: 'Special Elite', monospace; font-size: 12px; color: #5c4a3d; letter-spacing: 2px; }
+
+        @media (max-width: 1000px) {
+            .header { flex-direction: column; gap: 16px; padding: 20px; }
+            .nav { gap: 16px; flex-wrap: wrap; justify-content: center; }
+            .page-header h1 { font-size: 48px; }
+            .task-container { padding: 0 20px 60px; }
+            .back-btn { top: auto; bottom: 20px; left: 20px; width: 40px; height: 40px; font-size: 18px; }
+            .word-text { font-size: 40px; }
+            .overlay-screen h2 { font-size: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="game.html" class="back-btn" title="Назад к выбору игр"></a>
+
+    <header class="header">
+        <div class="logo">ДНЕВНИК<span>.</span>ВЫЖИВШЕГО</div>
+        <nav class="nav">
+            <a href="index.html">Главная</a>
+            <a href="bio.html">Хроники</a>
+            <a href="hobby.html">Реликвии</a>
+            <a href="dz.html">Задания JS</a>
+            <a href="game.html" class="active">Выживание</a>
+        </nav>
+    </header>
+
+    <header class="page-header">
+        <h1>Полиглот</h1>
+        <p>Испытание перевода</p>
+    </header>
+
+    <div class="task-container">
+        
+        <div class="task-desc">
+            <h2>Инструкция</h2>
+            <p>Тебе дается слово на иностранном языке. Напиши его перевод на русский и нажми <strong>Enter</strong>. У тебя есть 60 секунд.</p>
+        </div>
+
+        <div class="terminal-panel">
+            <div class="terminal-header">
+                <span>Переводчик</span>
+                <span>Языковая база: 240 слов</span>
+            </div>
+            
+            <div class="game-container">
+                
+                <div class="game-ui">
+                    <div class="ui-item">ОЧКИ: <span id="scoreVal">0</span></div>
+                    <div class="timer" id="timerVal">60</div>
+                    <div class="ui-item">КОМБО: <span id="comboVal">0</span></div>
+                </div>
+
+                <div class="word-card">
+                    <div class="lang-label" id="langLabel">ЯПОНСКИЙ</div>
+                    <div class="word-text jp" id="wordText">猫</div>
+                </div>
+
+                <div class="input-area">
+                    <input type="text" class="input-field" id="answerInput" placeholder="Введите перевод..." autocomplete="off" disabled>
+                    <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>Проверить</button>
+                </div>
+
+                <div class="message" id="messageBox"></div>
+
+                <div class="overlay-screen active" id="startScreen">
+                    <h2>ПОЛИГЛОТ</h2>
+                    <p>Проверь свою память. 240 слов из 5 языков.</p>
+                    <button onclick="startGame()">НАЧАТЬ ТЕСТ</button>
+                </div>
+
+                <div class="overlay-screen" id="endScreen">
+                    <h2>ВРЕМЯ ВЫШЛО</h2>
+                    <p>Твой результат:</p>
+                    <div class="score-display" id="finalScore">0</div>
+                    <button onclick="restartGame()">ПОПРОБОВАТЬ СНОВА</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="ticker">
+        <div class="ticker-content">
+            <span class="ticker-item">Внимание: обнаружена активность в секторе 7</span>
+            <span class="ticker-item">Рекомендуется не отключать питание</span>
+            <span class="ticker-item">Уровень радиации в норме</span>
+            <span class="ticker-item">Найдена новая схема для пайки</span>
+            <span class="ticker-item">Изучен новый иероглиф</span>
+            <span class="ticker-item">Внимание: обнаружена активность в секторе 7</span>
+            <span class="ticker-item">Рекомендуется не отключать питание</span>
+            <span class="ticker-item">Уровень радиации в норме</span>
+            <span class="ticker-item">Найдена новая схема для пайки</span>
+            <span class="ticker-item">Изучен новый иероглиф</span>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-logo">ДНЕВНИК<span style="color:#8b0000">.</span>ВЫЖИВШЕГО</div>
+        <p>© 2026 // ВСЕ СИСТЕМЫ В НОРМЕ</p>
+    </footer>
+
+    <script>
+        // --- Библиотека слов (240 штук) ---
+        const dictionary = {
+            jp: [
+                { word: '猫', translation: 'кошка' }, { word: '犬', translation: 'собака' },
+                { word: '水', translation: 'вода' }, { word: '火', translation: 'огонь' },
+                { word: '空', translation: 'небо' }, { word: '海', translation: 'море' },
+                { word: '山', translation: 'гора' }, { word: '花', translation: 'цветок' },
+                { word: '木', translation: 'дерево' }, { word: '人', translation: 'человек' },
+                { word: '目', translation: 'глаз' }, { word: '耳', translation: 'ухо' },
+                { word: '口', translation: 'рот' }, { word: '手', translation: 'рука' },
+                { word: '足', translation: 'нога' }, { word: '心', translation: 'сердце' },
+                { word: '夢', translation: 'сон' }, { word: '愛', translation: 'любовь' },
+                { word: '死', translation: 'смерть' }, { word: '生', translation: 'жизнь' },
+                { word: '友', translation: 'друг' }, { word: '家', translation: 'дом' },
+                { word: '道', translation: 'дорога' }, { word: '国', translation: 'страна' },
+                { word: '世界', translation: 'мир' }, { word: '時間', translation: 'время' },
+                { word: '今日', translation: 'сегодня' }, { word: '明日', translation: 'завтра' },
+                { word: '昨日', translation: 'вчера' }, { word: '朝', translation: 'утро' }
+            ],
+            en: [
+                // Базовые (из прошлой версии)
+                { word: 'Apple', translation: 'яблоко' }, { word: 'House', translation: 'дом' },
+                { word: 'Car', translation: 'машина' }, { word: 'Book', translation: 'книга' },
+                { word: 'Tree', translation: 'дерево' }, { word: 'Sun', translation: 'солнце' },
+                { word: 'Moon', translation: 'луна' }, { word: 'Star', translation: 'звезда' },
+                { word: 'Water', translation: 'вода' }, { word: 'Fire', translation: 'огонь' },
+                { word: 'Earth', translation: 'земля' }, { word: 'Wind', translation: 'ветер' },
+                { word: 'Cloud', translation: 'облако' }, { word: 'Rain', translation: 'дождь' },
+                { word: 'Snow', translation: 'снег' }, { word: 'Cat', translation: 'кошка' },
+                { word: 'Dog', translation: 'собака' }, { word: 'Bird', translation: 'птица' },
+                { word: 'Fish', translation: 'рыба' }, { word: 'Horse', translation: 'лошадь' },
+                { word: 'Bear', translation: 'медведь' }, { word: 'Wolf', translation: 'волк' },
+                { word: 'Mother', translation: 'мама' }, { word: 'Father', translation: 'папа' },
+                { word: 'Brother', translation: 'брат' }, { word: 'Sister', translation: 'сестра' },
+                { word: 'Friend', translation: 'друг' }, { word: 'Family', translation: 'семья' },
+                { word: 'Love', translation: 'любовь' }, { word: 'Time', translation: 'время' },
+                { word: 'Life', translation: 'жизнь' }, { word: 'Death', translation: 'смерть' },
+                { word: 'Dream', translation: 'мечта' }, { word: 'Hope', translation: 'надежда' },
+                { word: 'Fear', translation: 'страх' }, { word: 'Truth', translation: 'правда' },
+                { word: 'Lie', translation: 'ложь' }, { word: 'Red', translation: 'красный' },
+                { word: 'Blue', translation: 'синий' }, { word: 'Green', translation: 'зеленый' },
+                { word: 'Black', translation: 'черный' }, { word: 'White', translation: 'белый' },
+                { word: 'Run', translation: 'бежать' }, { word: 'Sleep', translation: 'спать' },
+                { word: 'Eat', translation: 'есть' }, { word: 'Drink', translation: 'пить' },
+                { word: 'Speak', translation: 'говорить' }, { word: 'Think', translation: 'думать' },
+                { word: 'See', translation: 'видеть' }, { word: 'Hear', translation: 'слышать' },
+                { word: 'School', translation: 'школа' }, { word: 'City', translation: 'город' },
+                { word: 'Country', translation: 'страна' }, { word: 'World', translation: 'мир' },
+                { word: 'Morning', translation: 'утро' }, { word: 'Night', translation: 'ночь' },
+                { word: 'Day', translation: 'день' }, { word: 'Year', translation: 'год' },
+                { word: 'Money', translation: 'деньги' }, { word: 'Phone', translation: 'телефон' },
+                { word: 'Window', translation: 'окно' }, { word: 'Door', translation: 'дверь' },
+                // ДОБАВЛЕННЫЕ СЛОВА (втрое больше)
+                { word: 'Mountain', translation: 'гора' }, { word: 'River', translation: 'река' },
+                { word: 'Forest', translation: 'лес' }, { word: 'Field', translation: 'поле' },
+                { word: 'Sky', translation: 'небо' }, { word: 'Sea', translation: 'море' },
+                { word: 'Flower', translation: 'цветок' }, { word: 'Grass', translation: 'трава' },
+                { word: 'Stone', translation: 'камень' }, { word: 'Metal', translation: 'металл' },
+                { word: 'Table', translation: 'стол' }, { word: 'Chair', translation: 'стул' },
+                { word: 'Bed', translation: 'кровать' }, { word: 'Wall', translation: 'стена' },
+                { word: 'Floor', translation: 'пол' }, { word: 'Roof', translation: 'крыша' },
+                { word: 'Bread', translation: 'хлеб' }, { word: 'Milk', translation: 'молоко' },
+                { word: 'Meat', translation: 'мясо' }, { word: 'Fish (food)', translation: 'рыба (еда)' },
+                { word: 'Fruit', translation: 'фрукт' }, { word: 'Vegetable', translation: 'овощ' },
+                { word: 'Happy', translation: 'счастливый' }, { word: 'Sad', translation: 'грустный' },
+                { word: 'Angry', translation: 'злой' }, { word: 'Tired', translation: 'усталый' },
+                { word: 'Strong', translation: 'сильный' }, { word: 'Weak', translation: 'слабый' },
+                { word: 'Fast', translation: 'быстрый' }, { word: 'Slow', translation: 'медленный' },
+                { word: 'Hot', translation: 'горячий' }, { word: 'Cold', translation: 'холодный' },
+                { word: 'New', translation: 'новый' }, { word: 'Old', translation: 'старый' },
+                { word: 'Big', translation: 'большой' }, { word: 'Small', translation: 'маленький' },
+                { word: 'Good', translation: 'хороший' }, { word: 'Bad', translation: 'плохой' },
+                { word: 'I', translation: 'я' }, { word: 'You', translation: 'ты' },
+                { word: 'He', translation: 'он' }, { word: 'She', translation: 'она' },
+                { word: 'We', translation: 'мы' }, { word: 'They', translation: 'они' },
+                { word: 'Walk', translation: 'идти' }, { word: 'Jump', translation: 'прыгать' },
+                { word: 'Write', translation: 'писать' }, { word: 'Read', translation: 'читать' },
+                { word: 'Play', translation: 'играть' }, { word: 'Work', translation: 'работать' },
+                { word: 'Love (verb)', translation: 'любить' }, { word: 'Hate', translation: 'ненавидеть' },
+                { word: 'Help', translation: 'помогать' }, { word: 'Wait', translation: 'ждать' }
+            ],
+            kr: [
+                { word: '사랑', translation: 'любовь' }, { word: '친구', translation: 'друг' },
+                { word: '가족', translation: 'семья' }, { word: '학교', translation: 'школа' },
+                { word: '집', translation: 'дом' }, { word: '물', translation: 'вода' },
+                { word: '불', translation: 'огонь' }, { word: '하늘', translation: 'небо' },
+                { word: '바다', translation: 'море' }, { word: '산', translation: 'гора' },
+                { word: '꽃', translation: 'цветок' }, { word: '나무', translation: 'дерево' },
+                { word: '사람', translation: 'человек' }, { word: '눈', translation: 'глаз / снег' },
+                { word: '귀', translation: 'ухо' }, { word: '입', translation: 'рот' },
+                { word: '손', translation: 'рука' }, { word: '발', translation: 'нога' },
+                { word: '마음', translation: 'сердце' }, { word: '꿈', translation: 'сон' },
+                { word: '죽음', translation: 'смерть' }, { word: '삶', translation: 'жизнь' },
+                { word: '시간', translation: 'время' }, { word: '오늘', translation: 'сегодня' },
+                { word: '내일', translation: 'завтра' }, { word: '어제', translation: 'вчера' },
+                { word: '아침', translation: 'утро' }, { word: '밤', translation: 'ночь' },
+                { word: '고양이', translation: 'кошка' }, { word: '개', translation: 'собака' }
+            ],
+            fr: [
+                { word: 'Chat', translation: 'кошка' }, { word: 'Chien', translation: 'собака' },
+                { word: 'Eau', translation: 'вода' }, { word: 'Feu', translation: 'огонь' },
+                { word: 'Ciel', translation: 'небо' }, { word: 'Mer', translation: 'море' },
+                { word: 'Montagne', translation: 'гора' }, { word: 'Fleur', translation: 'цветок' },
+                { word: 'Arbre', translation: 'дерево' }, { word: 'Homme', translation: 'человек' },
+                { word: 'Femme', translation: 'женщина' }, { word: 'Enfant', translation: 'ребенок' },
+                { word: 'Ami', translation: 'друг' }, { word: 'Amour', translation: 'любовь' },
+                { word: 'Mort', translation: 'смерть' }, { word: 'Vie', translation: 'жизнь' },
+                { word: 'Temps', translation: 'время' }, { word: 'Jour', translation: 'день' },
+                { word: 'Nuit', translation: 'ночь' }, { word: 'Soleil', translation: 'солнце' },
+                { word: 'Lune', translation: 'луна' }, { word: 'Étoile', translation: 'звезда' },
+                { word: 'Pluie', translation: 'дождь' }, { word: 'Neige', translation: 'снег' },
+                { word: 'Vent', translation: 'ветер' }, { word: 'Maison', translation: 'дом' },
+                { word: 'École', translation: 'школа' }, { word: 'Livre', translation: 'книга' },
+                { word: 'Voiture', translation: 'машина' }, { word: 'Ville', translation: 'город' }
+            ],
+            zh: [
+                { word: '猫', translation: 'кошка' }, { word: '狗', translation: 'собака' },
+                { word: '水', translation: 'вода' }, { word: '火', translation: 'огонь' },
+                { word: '天', translation: 'небо' }, { word: '海', translation: 'море' },
+                { word: '山', translation: 'гора' }, { word: '花', translation: 'цветок' },
+                { word: '树', translation: 'дерево' }, { word: '人', translation: 'человек' },
+                { word: '眼', translation: 'глаз' }, { word: '耳', translation: 'ухо' },
+                { word: '口', translation: 'рот' }, { word: '手', translation: 'рука' },
+                { word: '脚', translation: 'нога' }, { word: '心', translation: 'сердце' },
+                { word: '梦', translation: 'сон/мечта' }, { word: '爱', translation: 'любовь' },
+                { word: '死', translation: 'смерть' }, { word: '生', translation: 'жизнь' },
+                { word: '朋友', translation: 'друг' }, { word: '家', translation: 'дом' },
+                { word: '路', translation: 'дорога' }, { word: '国', translation: 'страна' },
+                { word: '世界', translation: 'мир' }, { word: '时间', translation: 'время' },
+                { word: '今天', translation: 'сегодня' }, { word: '明天', translation: 'завтра' },
+                { word: '昨天', translation: 'вчера' }, { word: '早上', translation: 'утро' }
+            ]
+        };
+
+        let score = 0;
+        let combo = 0;
+        let timeLeft = 60;
+        let timerInterval;
+        let currentWord = null;
+        let currentLang = 'jp';
+        let isPlaying = false;
+        let usedWords = new Set();
+
+        const scoreVal = document.getElementById('scoreVal');
+        const comboVal = document.getElementById('comboVal');
+        const timerVal = document.getElementById('timerVal');
+        const wordText = document.getElementById('wordText');
+        const langLabel = document.getElementById('langLabel');
+        const answerInput = document.getElementById('answerInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageBox = document.getElementById('messageBox');
+        const startScreen = document.getElementById('startScreen');
+        const endScreen = document.getElementById('endScreen');
+        const finalScore = document.getElementById('finalScore');
+
+        const langNames = {
+            jp: 'ЯПОНСКИЙ',
+            en: 'АНГЛИЙСКИЙ',
+            kr: 'КОРЕЙСКИЙ',
+            fr: 'ФРАНЦУЗСКИЙ',
+            zh: 'КИТАЙСКИЙ'
+        };
+
+        function startGame() {
+            score = 0;
+            combo = 0;
+            timeLeft = 60;
+            isPlaying = true;
+            usedWords.clear();
+            
+            updateUI();
+            startScreen.classList.remove('active');
+            endScreen.classList.remove('active');
+            
+            answerInput.disabled = false;
+            submitBtn.disabled = false;
+            answerInput.focus();
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateUI();
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            nextWord();
+        }
+
+        function nextWord() {
+            messageBox.textContent = '';
+            messageBox.className = 'message';
+            answerInput.value = '';
+            answerInput.focus();
+
+            let allWords = [];
+            for (let lang in dictionary) {
+                dictionary[lang].forEach((item, index) => {
+                    allWords.push({ ...item, lang: lang, id: `${lang}_${index}` });
+                });
+            }
+
+            let available = allWords.filter(w => !usedWords.has(w.id));
+            if (available.length === 0) {
+                usedWords.clear();
+                available = allWords;
+            }
+
+            currentWord = available[Math.floor(Math.random() * available.length)];
+            usedWords.add(currentWord.id);
+            currentLang = currentWord.lang;
+
+            wordText.textContent = currentWord.word;
+            langLabel.textContent = langNames[currentLang];
+            wordText.className = `word-text ${currentLang}`;
+        }
+
+        function checkAnswer() {
+            if (!isPlaying || !currentWord) return;
+
+            const userAnswer = answerInput.value.trim().toLowerCase();
+            const correctAnswer = currentWord.translation.toLowerCase();
+
+            if (userAnswer === '') return;
+
+            if (userAnswer === correctAnswer) {
+                combo++;
+                score += 10 + (combo * 2);
+                messageBox.textContent = 'ВЕРНО!';
+                messageBox.className = 'message success';
+                
+                wordText.style.color = '#00ff00';
+                setTimeout(() => wordText.style.color = '', 300);
+                
+                setTimeout(nextWord, 500);
+            } else {
+                combo = 0;
+                messageBox.textContent = `ОШИБКА. Правильно: ${currentWord.translation}`;
+                messageBox.className = 'message error';
+                
+                wordText.style.color = '#ff0000';
+                setTimeout(() => wordText.style.color = '', 300);
+
+                setTimeout(nextWord, 1500);
+            }
+            
+            updateUI();
+        }
+
+        function updateUI() {
+            scoreVal.textContent = score;
+            comboVal.textContent = combo;
+            timerVal.textContent = timeLeft;
+            
+            if (timeLeft <= 10) {
+                timerVal.classList.add('low');
+            } else {
+                timerVal.classList.remove('low');
+            }
+        }
+
+        function endGame() {
+            isPlaying = false;
+            clearInterval(timerInterval);
+            answerInput.disabled = true;
+            submitBtn.disabled = true;
+            
+            finalScore.textContent = score;
+            endScreen.classList.add('active');
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+    </script>
+
+</body>
+</html>

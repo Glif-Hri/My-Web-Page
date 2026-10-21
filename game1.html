@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дневник выжившего — Выживание</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=Special+Elite&family=IM+Fell+English:ital@0;1&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #080605;
+            color: #a89b8c;
+            font-family: 'EB Garamond', serif;
+            overflow-x: hidden;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+        
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: -2;
+            background: 
+                radial-gradient(circle at 50% 30%, rgba(40, 30, 20, 0.4), transparent 70%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+        }
+        
+        body::after {
+            content: ''; position: fixed; inset: 0; z-index: 100; pointer-events: none;
+            background: 
+                repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 4px),
+                radial-gradient(circle, transparent 40%, rgba(0,0,0,0.9) 100%);
+            opacity: 0.95;
+        }
+
+        .header {
+            position: relative; z-index: 10;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 30px 60px;
+            border-bottom: 1px solid rgba(168, 155, 140, 0.08);
+            background: linear-gradient(to bottom, rgba(8,6,5,0.9), transparent);
+        }
+        .logo {
+            font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700;
+            letter-spacing: 3px; color: #e8e0d5; text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(139,0,0,0.5);
+        }
+        .logo span { color: #8b0000; }
+        .nav { display: flex; gap: 36px; }
+        .nav a {
+            text-decoration: none; font-family: 'Inter', sans-serif;
+            font-size: 11px; font-weight: 600; letter-spacing: 2px;
+            color: #7a6d60; text-transform: uppercase; transition: all 0.3s;
+            position: relative;
+        }
+        .nav a:hover, .nav a.active { color: #e8e0d5; }
+        .nav a.active::after {
+            content: ''; position: absolute; bottom: -8px; left: 0; right: 0;
+            height: 1px; background: #8b0000; box-shadow: 0 0 10px #8b0000;
+        }
+
+        /* ===== КНОПКА НАЗАД (ТОЛЬКО КРУГЛАЯ СТРЕЛКА) ===== */
+        .back-btn {
+            position: fixed; top: 100px; left: 40px; z-index: 500;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 50px; height: 50px; 
+            background: #110d0b;
+            border: 1px solid rgba(139,0,0,0.4); 
+            border-radius: 50%;
+            color: #a89b8c; 
+            font-size: 24px;
+            text-decoration: none;
+            transition: all 0.3s ease; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        .back-btn::before { 
+            content: '←'; 
+            font-family: 'Inter', sans-serif;
+            transition: transform 0.3s; 
+        }
+        .back-btn:hover { 
+            color: #fff; 
+            border-color: #8b0000; 
+            background: #8b0000; 
+            box-shadow: 0 0 25px rgba(139,0,0,0.6); 
+        }
+        .back-btn:hover::before { 
+            transform: translateX(-5px); 
+        }
+
+        .page-header {
+            position: relative; z-index: 10;
+            text-align: center; padding: 80px 20px 40px;
+        }
+        .page-header h1 {
+            font-family: 'Cinzel', serif; font-size: 72px; font-weight: 600;
+            color: #e8e0d5; text-transform: uppercase; letter-spacing: 2px;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.9); margin-bottom: 20px;
+        }
+        .page-header p {
+            font-family: 'Special Elite', monospace; font-size: 14px; color: #8b0000;
+            letter-spacing: 4px; text-transform: uppercase;
+        }
+
+        .task-container {
+            position: relative; z-index: 10;
+            max-width: 1000px; margin: 0 auto; padding: 0 40px 120px;
+        }
+
+        .task-desc {
+            background: #110d0b; border-left: 4px solid #8b0000;
+            padding: 30px; margin-bottom: 30px;
+            box-shadow: 15px 15px 40px rgba(0,0,0,0.6); position: relative;
+        }
+        .task-desc h2 { font-family: 'Cinzel', serif; font-size: 24px; color: #e8e0d5; margin-bottom: 10px; }
+        .task-desc p { font-family: 'Special Elite', monospace; font-size: 14px; line-height: 1.8; color: #a89b8c; }
+
+        .terminal-panel {
+            background: #0a0806; border: 1px solid #2a211b; border-radius: 4px;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 20px 50px rgba(0,0,0,0.8); overflow: hidden;
+        }
+        .terminal-header {
+            background: #110d0b; padding: 15px 20px; border-bottom: 1px solid #2a211b;
+            font-family: 'Special Elite', monospace; font-size: 12px; color: #8b0000;
+            letter-spacing: 2px; text-transform: uppercase;
+            display: flex; justify-content: space-between;
+        }
+
+        .game-area {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #050403;
+            overflow: hidden;
+            cursor: crosshair;
+            background-image: 
+                linear-gradient(rgba(40, 30, 20, 0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(40, 30, 20, 0.2) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 20px; left: 20px; right: 20px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            pointer-events: none;
+            font-family: 'Special Elite', monospace;
+            font-size: 18px; color: #e8e0d5;
+            text-shadow: 0 2px 4px #000;
+            z-index: 10;
+        }
+
+        .ui-item span { color: #8b0000; font-weight: bold; }
+
+        .pause-btn {
+            pointer-events: auto;
+            background: rgba(17, 13, 11, 0.8);
+            border: 1px solid #8b0000;
+            color: #e8e0d5;
+            padding: 8px 15px;
+            font-family: 'Special Elite', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 20px;
+        }
+        .pause-btn:hover { background: #8b0000; }
+
+        .overlay-screen {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 0.5s;
+            z-index: 20;
+        }
+        .overlay-screen.active { opacity: 1; visibility: visible; }
+
+        .overlay-screen h2 {
+            font-family: 'Cinzel', serif; font-size: 64px;
+            color: #8b0000; text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(139,0,0,0.8); margin-bottom: 20px;
+        }
+        
+        .overlay-screen p {
+            font-family: 'Special Elite', monospace; font-size: 20px; 
+            color: #a89b8c; margin-bottom: 30px; text-align: center;
+            max-width: 600px;
+        }
+
+        .overlay-screen button {
+            background: #110d0b; border: 1px solid #8b0000; color: #e8e0d5;
+            padding: 15px 40px; font-family: 'Cinzel', serif; font-size: 18px;
+            font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .overlay-screen button:hover { background: #8b0000; box-shadow: 0 0 20px rgba(139,0,0,0.6); }
+
+        .ticker {
+            position: relative; z-index: 10; background: #8b0000; color: #0a0806;
+            padding: 12px 0; overflow: hidden; white-space: nowrap;
+            border-top: 1px solid #ff3333; border-bottom: 1px solid #ff3333; margin-top: 60px;
+        }
+        .ticker-content {
+            display: inline-block; animation: ticker 20s linear infinite;
+            font-family: 'Special Elite', monospace; font-size: 14px; font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase;
+        }
+        .ticker-item { display: inline-block; padding: 0 30px; }
+        .ticker-item::before { content: '⚠'; margin-right: 10px; }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .footer {
+            position: relative; z-index: 10; text-align: center; padding: 60px;
+            border-top: 1px solid rgba(168,155,140,0.08); background: #050403;
+        }
+        .footer-logo { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700; color: #e8e0d5; margin-bottom: 20px; }
+        .footer p { font-family: 'Special Elite', monospace; font-size: 12px; color: #5c4a3d; letter-spacing: 2px; }
+
+        @media (max-width: 1000px) {
+            .header { flex-direction: column; gap: 16px; padding: 20px; }
+            .nav { gap: 16px; flex-wrap: wrap; justify-content: center; }
+            .page-header h1 { font-size: 48px; }
+            .task-container { padding: 0 20px 60px; }
+            .back-btn { 
+                top: auto; bottom: 20px; left: 20px; 
+                width: 40px; height: 40px; font-size: 18px; 
+            }
+            .game-ui { font-size: 14px; flex-direction: column; gap: 10px; }
+            .pause-btn { margin-left: 0; }
+            .overlay-screen h2 { font-size: 40px; }
+            .overlay-screen p { font-size: 16px; padding: 0 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- КНОПКА НАЗАД (ТОЛЬКО СТРЕЛКА) -->
+    <a href="game.html" class="back-btn" title="Назад к заданиям"></a>
+
+    <header class="header">
+        <div class="logo">ДНЕВНИК<span>.</span>ВЫЖИВШЕГО</div>
+        <nav class="nav">
+            <a href="index.html">Главная</a>
+            <a href="bio.html">Хроники</a>
+            <a href="hobby.html">Реликвии</a>
+            <a href="dz.html">Задания JS</a>
+            <a href="game.html" class="active">Выживание</a>
+        </nav>
+    </header>
+
+    <header class="page-header">
+        <h1>Ходилка</h1>
+        <p>Попробуй продержаться как можно дольше!</p>
+    </header>
+
+    <div class="task-container">
+        
+        <div class="task-desc">
+            <h2>Протокол выживания</h2>
+            <p>Исследуй зону, собирай патроны и аптечки. Управление: <strong>WASD</strong> (движение), <strong>Мышь</strong> (прицел), <strong>ЛКМ</strong> (стрельба), <strong>R</strong> (перезарядка), <strong>P / Esc</strong> (пауза).</p>
+        </div>
+
+        <div class="terminal-panel">
+            <div class="terminal-header">
+                <span>Испытание // Зона</span>
+                <span>Активно</span>
+            </div>
+            
+            <div class="game-area" id="gameArea">
+                <div class="game-ui">
+                    <div>
+                        <div class="ui-item">ЗДОРОВЬЕ: <span id="healthVal">100</span></div>
+                        <div class="ui-item">ПАТРОНЫ: <span id="ammoVal">15</span> / <span id="reserveVal">45</span></div>
+                        <div class="ui-item">УБИТО: <span id="killsVal">0</span></div>
+                    </div>
+                    <button class="pause-btn" id="pauseBtn" onclick="togglePause()">ПАУЗА</button>
+                </div>
+
+                <div class="overlay-screen active" id="startScreen">
+                    <h2>ВЫЖИВАНИЕ</h2>
+                    <p>Ты оказался в Зоне. Здесь нет места скуке — только ты, твоё оружие и толпы заражённых. Продержись как можно дольше.</p>
+                    <button onclick="startGame()">НАЧАТЬ ВЫЖИВАНИЕ</button>
+                </div>
+
+                <div class="overlay-screen" id="pauseScreen">
+                    <h2>ПАУЗА</h2>
+                    <p>Система приостановлена. Воспользуйся моментом, чтобы перевести дух.</p>
+                    <button onclick="togglePause()">ПРОДОЛЖИТЬ</button>
+                </div>
+
+                <div class="overlay-screen" id="gameOverScreen">
+                    <h2>ВЫ ПОГИБЛИ</h2>
+                    <p>Зона забрала ещё одного...</p>
+                    <button onclick="restartGame()">ПОПРОБОВАТЬ СНОВА</button>
+                </div>
+
+                <canvas id="gameCanvas"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="ticker">
+        <div class="ticker-content">
+            <span class="ticker-item">Внимание: обнаружена активность в секторе 7</span>
+            <span class="ticker-item">Рекомендуется не отключать питание</span>
+            <span class="ticker-item">Уровень радиации в норме</span>
+            <span class="ticker-item">Найдена новая схема для пайки</span>
+            <span class="ticker-item">Изучен новый иероглиф</span>
+            <span class="ticker-item">Внимание: обнаружена активность в секторе 7</span>
+            <span class="ticker-item">Рекомендуется не отключать питание</span>
+            <span class="ticker-item">Уровень радиации в норме</span>
+            <span class="ticker-item">Найдена новая схема для пайки</span>
+            <span class="ticker-item">Изучен новый иероглиф</span>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-logo">ДНЕВНИК<span style="color:#8b0000">.</span>ВЫЖИВШЕГО</div>
+        <p>© 2026 // ВСЕ СИСТЕМЫ В НОРМЕ</p>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gameArea = document.getElementById('gameArea');
+        
+        const healthVal = document.getElementById('healthVal');
+        const ammoVal = document.getElementById('ammoVal');
+        const reserveVal = document.getElementById('reserveVal');
+        const killsVal = document.getElementById('killsVal');
+        
+        const startScreen = document.getElementById('startScreen');
+        const pauseScreen = document.getElementById('pauseScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const pauseBtn = document.getElementById('pauseBtn');
+
+        let width, height;
+
+        function resize() {
+            width = gameArea.clientWidth;
+            height = gameArea.clientHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        let player;
+        let bullets;
+        let enemies;
+        let items;
+        let particles;
+        let keys;
+        let mouse;
+        let score;
+        let gameLoop;
+        let isGameOver;
+        let isPaused;
+        let isStarted;
+        let lastShotTime;
+        let spawnTimer;
+        let itemTimer;
+        let difficultyTimer;
+        let currentSpawnInterval = 2000;
+        let enemySpeedBonus = 0;
+
+        function initGame() {
+            player = {
+                x: width / 2, y: height / 2,
+                radius: 15, speed: 4,
+                health: 100, maxHealth: 100,
+                ammo: 15, maxAmmo: 15, reserve: 45,
+                reloading: false, reloadTime: 1200,
+                lastDamageTime: 0
+            };
+
+            bullets = []; enemies = []; items = []; particles = [];
+            keys = {};
+            mouse = { x: player.x, y: player.y, down: false };
+            score = 0;
+            isGameOver = false;
+            isPaused = false;
+            isStarted = false;
+            currentSpawnInterval = 2000;
+            enemySpeedBonus = 0;
+            lastShotTime = 0;
+            
+            clearInterval(spawnTimer);
+            clearInterval(itemTimer);
+            clearInterval(difficultyTimer);
+
+            updateUI();
+            if (gameLoop) cancelAnimationFrame(gameLoop);
+            gameLoop = requestAnimationFrame(loop);
+        }
+
+        function updateUI() {
+            healthVal.textContent = Math.max(0, player.health);
+            ammoVal.textContent = player.reloading ? '...' : player.ammo;
+            reserveVal.textContent = player.reserve;
+            killsVal.textContent = score;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Escape' || e.code === 'KeyP') {
+                if (isStarted && !isGameOver) togglePause();
+            }
+            if (isPaused || !isStarted) return;
+            
+            keys[e.code] = true;
+            if (e.code === 'KeyR' && !player.reloading && player.ammo < player.maxAmmo && player.reserve > 0) {
+                reload();
+            }
+        });
+        window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+        gameArea.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+        });
+
+        gameArea.addEventListener('mousedown', (e) => { 
+            if (e.button === 0 && !isPaused && isStarted && !isGameOver) {
+                mouse.down = true;
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => { 
+            if (e.button === 0) mouse.down = false; 
+        });
+
+        window.addEventListener('blur', () => { mouse.down = false; });
+        document.addEventListener('mouseleave', () => { mouse.down = false; });
+
+        function reload() {
+            player.reloading = true;
+            updateUI();
+            setTimeout(() => {
+                const needed = player.maxAmmo - player.ammo;
+                const transfer = Math.min(needed, player.reserve);
+                player.ammo += transfer;
+                player.reserve -= transfer;
+                player.reloading = false;
+                updateUI();
+            }, player.reloadTime);
+        }
+
+        function startSpawnLogic() {
+            clearInterval(spawnTimer);
+            spawnTimer = setInterval(() => {
+                if (!isGameOver && !isPaused) spawnEnemy();
+            }, currentSpawnInterval);
+
+            difficultyTimer = setInterval(() => {
+                if (!isGameOver && !isPaused) {
+                    if (currentSpawnInterval > 500) currentSpawnInterval -= 150;
+                    enemySpeedBonus += 0.1;
+                    
+                    clearInterval(spawnTimer);
+                    spawnTimer = setInterval(() => {
+                        if (!isGameOver && !isPaused) spawnEnemy();
+                    }, currentSpawnInterval);
+                }
+            }, 10000);
+
+            clearInterval(itemTimer);
+            itemTimer = setInterval(() => {
+                if (!isGameOver && !isPaused) spawnItem();
+            }, 10000);
+        }
+
+        function spawnEnemy() {
+            let x, y;
+            if (Math.random() < 0.5) {
+                x = Math.random() < 0.5 ? -30 : width + 30;
+                y = Math.random() * height;
+            } else {
+                x = Math.random() * width;
+                y = Math.random() < 0.5 ? -30 : height + 30;
+            }
+
+            enemies.push({
+                x, y,
+                radius: 15 + Math.random() * 5,
+                speed: 1 + Math.random() * 0.8 + enemySpeedBonus,
+                health: 10,
+                color: '#8b0000'
+            });
+        }
+
+        function spawnItem() {
+            const type = Math.random() < 0.5 ? 'ammo' : 'health';
+            items.push({
+                x: Math.random() * (width - 60) + 30,
+                y: Math.random() * (height - 60) + 30,
+                radius: 10,
+                type
+            });
+        }
+
+        function createParticles(x, y, color, count = 5) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    life: 1, color,
+                    size: Math.random() * 3 + 1
+                });
+            }
+        }
+
+        function shoot() {
+            const now = Date.now();
+            if (now - lastShotTime < 150) return;
+            if (player.reloading) return;
+            
+            if (player.ammo > 0) {
+                player.ammo--;
+                lastShotTime = now;
+                updateUI();
+
+                const angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+                createParticles(player.x + Math.cos(angle) * 20, player.y + Math.sin(angle) * 20, '#ffcc00', 3);
+
+                bullets.push({
+                    x: player.x + Math.cos(angle) * 20,
+                    y: player.y + Math.sin(angle) * 20,
+                    vx: Math.cos(angle) * 15,
+                    vy: Math.sin(angle) * 15,
+                    radius: 3
+                });
+            } else if (player.reserve > 0) {
+                reload();
+            }
+        }
+
+        function update() {
+            if (isGameOver || isPaused || !isStarted) return;
+
+            let dx = 0, dy = 0;
+            if (keys['KeyW'] || keys['ArrowUp']) dy -= 1;
+            if (keys['KeyS'] || keys['ArrowDown']) dy += 1;
+            if (keys['KeyA'] || keys['ArrowLeft']) dx -= 1;
+            if (keys['KeyD'] || keys['ArrowRight']) dx += 1;
+
+            if (dx !== 0 || dy !== 0) {
+                const len = Math.sqrt(dx * dx + dy * dy);
+                player.x += (dx / len) * player.speed;
+                player.y += (dy / len) * player.speed;
+                player.x = Math.max(player.radius, Math.min(width - player.radius, player.x));
+                player.y = Math.max(player.radius, Math.min(height - player.radius, player.y));
+            }
+
+            if (mouse.down) shoot();
+
+            for (let i = items.length - 1; i >= 0; i--) {
+                let item = items[i];
+                if (Math.hypot(player.x - item.x, player.y - item.y) < player.radius + item.radius) {
+                    if (item.type === 'ammo') {
+                        player.reserve += 30;
+                        createParticles(item.x, item.y, '#ffcc00', 10);
+                    } else {
+                        player.health = Math.min(player.maxHealth, player.health + 30);
+                        createParticles(item.x, item.y, '#00ff00', 10);
+                    }
+                    items.splice(i, 1);
+                    updateUI();
+                }
+            }
+
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                let b = bullets[i];
+                b.x += b.vx;
+                b.y += b.vy;
+                
+                if (b.x < 0 || b.x > width || b.y < 0 || b.y > height) {
+                    bullets.splice(i, 1);
+                    continue;
+                }
+
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    let e = enemies[j];
+                    if (Math.hypot(b.x - e.x, b.y - e.y) < e.radius + b.radius) {
+                        e.health -= 5;
+                        createParticles(b.x, b.y, '#8b0000', 4);
+                        bullets.splice(i, 1);
+                        
+                        if (e.health <= 0) {
+                            createParticles(e.x, e.y, '#8b0000', 15);
+                            enemies.splice(j, 1);
+                            score++;
+                            updateUI();
+                            if (Math.random() < 0.15) spawnItem(); 
+                        }
+                        break;
+                    }
+                }
+            }
+
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                let e = enemies[i];
+                const angle = Math.atan2(player.y - e.y, player.x - e.x);
+                e.x += Math.cos(angle) * e.speed;
+                e.y += Math.sin(angle) * e.speed;
+
+                if (Math.hypot(player.x - e.x, player.y - e.y) < player.radius + e.radius) {
+                    if (Date.now() - player.lastDamageTime > 500) {
+                        player.health -= 10;
+                        player.lastDamageTime = Date.now();
+                        createParticles(player.x, player.y, '#ff0000', 8);
+                        updateUI();
+                        if (player.health <= 0) gameOver();
+                    }
+                }
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vx *= 0.95;
+                p.vy *= 0.95;
+                p.life -= 0.02;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            items.forEach(item => {
+                ctx.save();
+                ctx.translate(item.x, item.y);
+                if (item.type === 'ammo') {
+                    ctx.fillStyle = '#ffcc00';
+                    ctx.fillRect(-8, -8, 16, 16);
+                    ctx.fillStyle = '#000';
+                    ctx.font = '10px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('A', 0, 0);
+                } else {
+                    ctx.fillStyle = '#00ff00';
+                    ctx.fillRect(-8, -8, 16, 16);
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(-2, -6, 4, 12);
+                    ctx.fillRect(-6, -2, 12, 4);
+                }
+                ctx.restore();
+            });
+
+            bullets.forEach(b => {
+                ctx.fillStyle = '#ffcc00';
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ffcc00';
+            });
+            ctx.shadowBlur = 0;
+
+            enemies.forEach(e => {
+                ctx.fillStyle = e.color;
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.arc(e.x - e.radius*0.3, e.y - e.radius*0.2, 2, 0, Math.PI*2);
+                ctx.arc(e.x + e.radius*0.3, e.y - e.radius*0.2, 2, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            if (isStarted) {
+                ctx.save();
+                ctx.translate(player.x, player.y);
+                const angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+                ctx.rotate(angle);
+                ctx.fillStyle = player.health > 30 ? '#a89b8c' : '#ff0000';
+                ctx.beginPath();
+                ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#2a211b';
+                ctx.fillRect(10, -4, 20, 8);
+                ctx.restore();
+
+                if (mouse.x >= 0 && mouse.x <= width && mouse.y >= 0 && mouse.y <= height) {
+                    ctx.strokeStyle = '#8b0000';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(mouse.x, mouse.y, 8, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(mouse.x - 12, mouse.y); ctx.lineTo(mouse.x - 4, mouse.y);
+                    ctx.moveTo(mouse.x + 4, mouse.y); ctx.lineTo(mouse.x + 12, mouse.y);
+                    ctx.moveTo(mouse.x, mouse.y - 12); ctx.lineTo(mouse.x, mouse.y - 4);
+                    ctx.moveTo(mouse.x, mouse.y + 4); ctx.lineTo(mouse.x, mouse.y + 12);
+                    ctx.stroke();
+                }
+            }
+
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        function loop() {
+            update();
+            draw();
+            gameLoop = requestAnimationFrame(loop);
+        }
+
+        function startGame() {
+            isStarted = true;
+            startScreen.classList.remove('active');
+            startSpawnLogic();
+        }
+
+        function togglePause() {
+            if (!isStarted || isGameOver) return;
+            isPaused = !isPaused;
+            mouse.down = false; 
+            
+            if (isPaused) {
+                pauseScreen.classList.add('active');
+                pauseBtn.textContent = 'ПРОДОЛЖИТЬ';
+            } else {
+                pauseScreen.classList.remove('active');
+                pauseBtn.textContent = 'ПАУЗА';
+            }
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            gameOverScreen.classList.add('active');
+            mouse.down = false;
+            clearInterval(spawnTimer);
+            clearInterval(itemTimer);
+            clearInterval(difficultyTimer);
+        }
+
+        function restartGame() {
+            gameOverScreen.classList.remove('active');
+            initGame();
+            startGame();
+        }
+
+        initGame();
+    </script>
+
+</body>
+</html>

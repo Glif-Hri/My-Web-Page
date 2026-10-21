@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хроники выжившего — Реликвии</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=Special+Elite&family=IM+Fell+English:ital@0;1&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ===== ОБЩИЙ ФОН ===== */
+        body {
+            background-color: #080605;
+            color: #a89b8c;
+            font-family: 'EB Garamond', serif;
+            overflow-x: hidden;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+        
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: -2;
+            background: 
+                radial-gradient(circle at 50% 30%, rgba(40, 30, 20, 0.4), transparent 70%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+        }
+        
+        body::after {
+            content: ''; position: fixed; inset: 0; z-index: 100; pointer-events: none;
+            background: 
+                repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 4px),
+                radial-gradient(circle, transparent 40%, rgba(0,0,0,0.9) 100%);
+            opacity: 0.95;
+        }
+
+        /* ===== ШАПКА ===== */
+        .header {
+            position: relative; z-index: 10;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 30px 60px;
+            border-bottom: 1px solid rgba(168, 155, 140, 0.08);
+            background: linear-gradient(to bottom, rgba(8,6,5,0.9), transparent);
+        }
+        .logo {
+            font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700;
+            letter-spacing: 3px; color: #e8e0d5; text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(139,0,0,0.5);
+        }
+        .logo span { color: #8b0000; }
+        .nav { display: flex; gap: 36px; }
+        .nav a {
+            text-decoration: none; font-family: 'Inter', sans-serif;
+            font-size: 11px; font-weight: 600; letter-spacing: 2px;
+            color: #7a6d60; text-transform: uppercase; transition: all 0.3s;
+            position: relative;
+        }
+        .nav a:hover, .nav a.active { color: #e8e0d5; }
+        .nav a.active::after {
+            content: ''; position: absolute; bottom: -8px; left: 0; right: 0;
+            height: 1px; background: #8b0000; box-shadow: 0 0 10px #8b0000;
+        }
+
+        /* ===== ЗАГОЛОВОК СТРАНИЦЫ ===== */
+        .page-header {
+            position: relative; z-index: 10;
+            text-align: center; padding: 100px 20px 60px;
+        }
+        .page-header h1 {
+            font-family: 'Cinzel', serif; font-size: 72px; font-weight: 600;
+            color: #e8e0d5; text-transform: uppercase; letter-spacing: 2px;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            margin-bottom: 20px;
+        }
+        .page-header p {
+            font-family: 'Special Elite', monospace; font-size: 14px; color: #8b0000;
+            letter-spacing: 4px; text-transform: uppercase;
+        }
+
+        /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+        .inventory-container {
+            position: relative; z-index: 10;
+            max-width: 1200px; margin: 0 auto;
+            padding: 0 40px 120px;
+        }
+
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            perspective: 1000px;
+        }
+
+        .case-card {
+            position: relative;
+            background: #110d0b;
+            border: 1px solid rgba(42, 33, 27, 0.8);
+            padding: 50px 40px;
+            text-decoration: none;
+            display: flex; flex-direction: column;
+            box-shadow: 15px 15px 40px rgba(0,0,0,0.6);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .case-card:nth-child(1) { transform: rotate(-1deg); }
+        .case-card:nth-child(2) { transform: rotate(0.5deg); }
+        .case-card:nth-child(3) { transform: rotate(-0.5deg); }
+        .case-card:nth-child(4) { transform: rotate(1deg); }
+        .case-card:nth-child(5) { transform: rotate(-0.8deg); }
+
+        .case-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .case-card::after {
+            content: ''; position: absolute; top: 0; left: 0; bottom: 0;
+            width: 4px; background: #8b0000; transition: background 0.3s;
+        }
+
+        .case-card:hover {
+            transform: rotate(0) translateY(-10px) scale(1.02) !important;
+            border-color: rgba(139,0,0,0.5);
+            background: #16110e;
+            box-shadow: 20px 25px 50px rgba(0,0,0,0.8), 0 0 30px rgba(139,0,0,0.15);
+            z-index: 2;
+        }
+        .case-card:hover::after { background: #ff0000; }
+
+        .card-file-num {
+            position: absolute; top: 50px; right: 20px;
+            font-family: 'Special Elite', monospace; font-size: 13px;
+            color: rgba(139,0,0,0.4); letter-spacing: 2px;
+            transition: color 0.3s;
+        }
+        .case-card:hover .card-file-num { color: #ff0000; }
+
+        .case-card h2 {
+            font-family: 'Cinzel', serif; font-size: 28px; font-weight: 600;
+            color: #e8e0d5; margin-bottom: 20px;
+            border-bottom: 1px dashed #3a2e26; padding-bottom: 15px;
+            position: relative; z-index: 2;
+        }
+
+        .case-card p {
+            font-family: 'Special Elite', monospace; font-size: 14px;
+            line-height: 1.9; color: #a89b8c; margin-bottom: 20px;
+            text-align: justify; position: relative; z-index: 2;
+            flex-grow: 1;
+        }
+
+        .card-stats {
+            display: flex; justify-content: space-between;
+            border-top: 1px dashed #3a2e26; padding-top: 15px;
+            font-family: 'Special Elite', monospace; font-size: 11px;
+            color: #6b5a4d; position: relative; z-index: 2;
+        }
+        .card-stats span { color: #8b0000; }
+
+        .wip-tag {
+            display: inline-block; font-family: 'Special Elite', monospace;
+            font-size: 11px; color: #8b0000; border: 1px solid #8b0000;
+            padding: 4px 10px; margin-top: 10px; transform: rotate(-2deg);
+            position: relative; z-index: 2;
+        }
+
+        /* Бегущая строка */
+        .ticker {
+            position: relative; z-index: 10;
+            background: #8b0000; color: #0a0806;
+            padding: 12px 0; overflow: hidden; white-space: nowrap;
+            border-top: 1px solid #ff3333; border-bottom: 1px solid #ff3333;
+            margin-top: 60px;
+        }
+        .ticker-content {
+            display: inline-block; animation: ticker 20s linear infinite;
+            font-family: 'Special Elite', monospace; font-size: 14px; font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase;
+        }
+        .ticker-item { display: inline-block; padding: 0 30px; }
+        .ticker-item::before { content: '⚠'; margin-right: 10px; }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* ===== ФУТЕР ===== */
+        .footer {
+            position: relative; z-index: 10;
+            text-align: center; padding: 60px;
+            border-top: 1px solid rgba(168,155,140,0.08);
+            background: #050403;
+        }
+        .footer-logo {
+            font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700;
+            color: #e8e0d5; margin-bottom: 20px;
+        }
+        .footer p {
+            font-family: 'Special Elite', monospace; font-size: 12px;
+            color: #5c4a3d; letter-spacing: 2px;
+        }
+
+        /* ===== КНОПКА НАВЕРХ ===== */
+        .scroll-top-btn {
+            position: fixed; bottom: 40px; right: 40px; z-index: 999;
+            width: 50px; height: 50px; background: #110d0b;
+            border: 1px solid #8b0000; border-radius: 50%;
+            color: #8b0000; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; cursor: pointer; opacity: 0; visibility: hidden;
+            transition: all 0.3s ease; box-shadow: 0 0 15px rgba(139,0,0,0.2);
+        }
+        .scroll-top-btn.show { opacity: 1; visibility: visible; }
+        .scroll-top-btn:hover {
+            background: #8b0000; color: #e8e0d5;
+            box-shadow: 0 0 25px rgba(139,0,0,0.6); transform: translateY(-5px);
+        }
+        .scroll-top-btn::before { content: '▲'; font-size: 16px; transform: scaleX(1.5); }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 1000px) {
+            .header { flex-direction: column; gap: 16px; padding: 20px; }
+            .nav { gap: 16px; flex-wrap: wrap; justify-content: center; }
+            .page-header h1 { font-size: 48px; }
+            .inventory-container { padding: 0 20px 60px; }
+            .case-grid { grid-template-columns: 1fr; gap: 30px; }
+            .case-card { padding: 30px 20px; transform: none !important; }
+            .scroll-top-btn { bottom: 20px; right: 20px; width: 40px; height: 40px; font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ШАПКА -->
+    <header class="header">
+        <div class="logo">ДНЕВНИК<span>.</span>ВЫЖИВШЕГО</div>
+        <nav class="nav">
+            <a href="index.html">Главная</a>
+            <a href="bio.html">Хроники</a>
+            <a href="hobby.html" class="active">Реликвии</a>
+            <a href="dz.html">Задания JS</a>
+            <a href="game.html">Выживание</a>
+        </nav>
+    </header>
+
+    <!-- ЗАГОЛОВОК СТРАНИЦЫ -->
+    <header class="page-header">
+        <h1>Реликвии</h1>
+        <p>Архив увлечений // Дело № 2007</p>
+    </header>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <div class="inventory-container">
+        <div class="case-grid">
+            
+            <!-- Карточка 1: Радиоэлектроника -->
+            <a href="#" class="case-card">
+                <div class="card-file-num">FILE 01</div>
+                <h2>Радиоэлектроника</h2>
+                <p>Увлекаюсь недавно. Собираю радионаборы для пайки: сердце из светодиодов, металлоискатель, светящуюся ёлочку и звезду.</p>
+                <div class="card-stats">
+                    <div>СЛОЖНОСТЬ: <span>ВЫСОКАЯ</span></div>
+                    <div>СТАТУС: <span>АКТИВНО</span></div>
+                </div>
+            </a>
+
+            <!-- Карточка 2: Компьютерные игры -->
+            <a href="#" class="case-card">
+                <div class="card-file-num">FILE 02</div>
+                <h2>Компьютерные игры</h2>
+                <p>Играю с детства. Первые игры: S.T.A.L.K.E.R., Serious Sam 3, Borderlands, Kings Bounty. Любимые сейчас: Dark Souls III, Resident Evil 4, The Outlast Trials.</p>
+                <div class="card-stats">
+                    <div>СЛОЖНОСТЬ: <span>ХАРДКОР</span></div>
+                    <div>СТАТУС: <span>В ПРОЦЕССЕ</span></div>
+                </div>
+            </a>
+
+            <!-- Карточка 3: Рисование -->
+            <a href="#" class="case-card">
+                <div class="card-file-num">FILE 03</div>
+                <h2>Рисование</h2>
+                <p>6 лет художественной школы, красный диплом. Сейчас рисую редко, но для себя и по вдохновению.</p>
+                <span class="wip-tag">ДАННЫЕ НЕ ЗАГРУЖЕНЫ</span>
+                <div class="card-stats" style="margin-top: 20px;">
+                    <div>СЛОЖНОСТЬ: <span>СРЕДНЯЯ</span></div>
+                    <div>СТАТУС: <span>ПО ВДОХНОВЕНИЮ</span></div>
+                </div>
+            </a>
+
+            <!-- Карточка 4: Алмазная мозаика -->
+            <a href="#" class="case-card">
+                <div class="card-file-num">FILE 04</div>
+                <h2>Алмазная мозаика</h2>
+                <p>Увлеклась в школе. Медитативный процесс выкладывания картин стразами. Помогает отвлечься и получить дзен.</p>
+                <div class="card-stats">
+                    <div>СЛОЖНОСТЬ: <span>НИЗКАЯ</span></div>
+                    <div>СТАТУС: <span>ДЛЯ УСПОКОЕНИЯ</span></div>
+                </div>
+            </a>
+
+            <!-- Карточка 5: Изучение языков -->
+            <a href="#" class="case-card">
+                <div class="card-file-num">FILE 05</div>
+                <h2>Изучение языков</h2>
+                <p>Начинала с французского, японского и корейского. Сейчас углублена в английский, иногда балуюсь китайским. Если бы доводила всё до конца — была бы полиглотом.</p>
+                <div class="card-stats">
+                    <div>СЛОЖНОСТЬ: <span>ВЫСОКАЯ</span></div>
+                    <div>СТАТУС: <span>В ПРОЦЕССЕ</span></div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- БЕГУЩАЯ СТРОКА -->
+    <div class="ticker">
+        <div class="ticker-content">
+            <span class="ticker-item">Внимание: обнаружена активность в секторе 7</span>
+            <span class="ticker-item">Рекомендуется не отключать питание</span>
+            <span class="ticker-item">Уровень радиации в норме</span>
+            <span class="ticker-item">Найдена новая схема для пайки</span>
+            <span class="ticker-item">Изучен новый иероглиф</span>
+            <!-- Дубликат для бесшовности -->
+            <span class="ticker-item">Внимание: обнаружена активность в секторе 7</span>
+            <span class="ticker-item">Рекомендуется не отключать питание</span>
+            <span class="ticker-item">Уровень радиации в норме</span>
+            <span class="ticker-item">Найдена новая схема для пайки</span>
+            <span class="ticker-item">Изучен новый иероглиф</span>
+        </div>
+    </div>
+
+    <!-- ФУТЕР -->
+    <footer class="footer">
+        <div class="footer-logo">ДНЕВНИК<span style="color:#8b0000">.</span>ВЫЖИВШЕГО</div>
+        <p>© 2026 // ВСЕ СИСТЕМЫ В НОРМЕ</p>
+    </footer>
+
+    <!-- КНОПКА НАВЕРХ -->
+    <button class="scroll-top-btn" id="scrollTopBtn" aria-label="Наверх"></button>
+
+    <script>
+        const scrollTopBtn = document.getElementById("scrollTopBtn");
+        window.onscroll = function() {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                scrollTopBtn.classList.add("show");
+            } else {
+                scrollTopBtn.classList.remove("show");
+            }
+        };
+        scrollTopBtn.addEventListener("click", function() {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+    </script>
+
+</body>
+</html>

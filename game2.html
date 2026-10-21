@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дневник выжившего — Ремонт Схемы</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=Special+Elite&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #080605;
+            color: #a89b8c;
+            font-family: 'EB Garamond', serif;
+            overflow-x: hidden;
+            position: relative;
+            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: -2;
+            background: 
+                radial-gradient(circle at 50% 30%, rgba(40, 30, 20, 0.4), transparent 70%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+        }
+        
+        body::after {
+            content: ''; position: fixed; inset: 0; z-index: 100; pointer-events: none;
+            background: 
+                repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 4px),
+                radial-gradient(circle, transparent 40%, rgba(0,0,0,0.9) 100%);
+            opacity: 0.95;
+        }
+
+        .header {
+            position: relative; z-index: 10;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 30px 60px;
+            border-bottom: 1px solid rgba(168, 155, 140, 0.08);
+            background: linear-gradient(to bottom, rgba(8,6,5,0.9), transparent);
+        }
+        .logo {
+            font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700;
+            letter-spacing: 3px; color: #e8e0d5; text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(139,0,0,0.5);
+        }
+        .logo span { color: #8b0000; }
+        .nav { display: flex; gap: 36px; }
+        .nav a {
+            text-decoration: none; font-family: 'Inter', sans-serif;
+            font-size: 11px; font-weight: 600; letter-spacing: 2px;
+            color: #7a6d60; text-transform: uppercase; transition: all 0.3s;
+            position: relative;
+        }
+        .nav a:hover, .nav a.active { color: #e8e0d5; }
+        .nav a.active::after {
+            content: ''; position: absolute; bottom: -8px; left: 0; right: 0;
+            height: 1px; background: #8b0000; box-shadow: 0 0 10px #8b0000;
+        }
+
+        .back-btn {
+            position: fixed; top: 100px; left: 40px; z-index: 500;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 50px; height: 50px; 
+            background: #110d0b;
+            border: 1px solid rgba(139,0,0,0.4); 
+            border-radius: 50%;
+            color: #a89b8c; 
+            font-size: 24px;
+            text-decoration: none;
+            transition: all 0.3s ease; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        .back-btn::before { content: '←'; font-family: 'Inter', sans-serif; transition: transform 0.3s; }
+        .back-btn:hover { color: #fff; border-color: #8b0000; background: #8b0000; box-shadow: 0 0 25px rgba(139,0,0,0.6); }
+        .back-btn:hover::before { transform: translateX(-5px); }
+
+        .page-header {
+            position: relative; z-index: 10;
+            text-align: center; padding: 80px 20px 40px;
+        }
+        .page-header h1 {
+            font-family: 'Cinzel', serif; font-size: 72px; font-weight: 600;
+            color: #e8e0d5; text-transform: uppercase; letter-spacing: 2px;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.9); margin-bottom: 20px;
+        }
+        .page-header p {
+            font-family: 'Special Elite', monospace; font-size: 14px; color: #8b0000;
+            letter-spacing: 4px; text-transform: uppercase;
+        }
+
+        .task-container {
+            position: relative; z-index: 10;
+            max-width: 1000px; margin: 0 auto; padding: 0 40px 120px;
+            flex: 1;
+        }
+
+        .task-desc {
+            background: #110d0b; border-left: 4px solid #8b0000;
+            padding: 30px; margin-bottom: 30px;
+            box-shadow: 15px 15px 40px rgba(0,0,0,0.6); position: relative;
+        }
+        .task-desc h2 { font-family: 'Cinzel', serif; font-size: 24px; color: #e8e0d5; margin-bottom: 10px; }
+        .task-desc p { font-family: 'Special Elite', monospace; font-size: 14px; line-height: 1.8; color: #a89b8c; }
+
+        .terminal-panel {
+            background: #0a0806; border: 1px solid #2a211b; border-radius: 4px;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 20px 50px rgba(0,0,0,0.8); overflow: hidden;
+        }
+        .terminal-header {
+            background: #110d0b; padding: 15px 20px; border-bottom: 1px solid #2a211b;
+            font-family: 'Special Elite', monospace; font-size: 12px; color: #8b0000;
+            letter-spacing: 2px; text-transform: uppercase;
+            display: flex; justify-content: space-between;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #050403;
+            overflow: hidden;
+            /* Убираем flex, чтобы canvas сам занимал нужный размер */
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 20px; left: 20px; right: 20px;
+            display: flex; justify-content: space-between;
+            z-index: 20;
+            pointer-events: none;
+            font-family: 'Special Elite', monospace;
+            font-size: 18px;
+            color: #e8e0d5;
+            text-shadow: 0 2px 4px #000;
+        }
+
+        .ui-item span { color: #8b0000; font-weight: bold; }
+
+        .controls-hint {
+            position: absolute;
+            bottom: 20px; right: 20px;
+            font-family: 'Special Elite', monospace;
+            font-size: 14px; color: #6b5a4d;
+            z-index: 20;
+            text-align: right;
+            line-height: 1.5;
+            pointer-events: none;
+        }
+
+        .overlay-screen {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 1s;
+            z-index: 30;
+        }
+        .overlay-screen.active { opacity: 1; visibility: visible; }
+        .overlay-screen h2 {
+            font-family: 'Cinzel', serif; font-size: 60px;
+            color: #8b0000; text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(139,0,0,0.8); margin-bottom: 20px;
+            letter-spacing: 5px;
+        }
+        .overlay-screen p {
+            font-family: 'Special Elite', monospace; font-size: 20px; 
+            color: #a89b8c; margin-bottom: 30px; text-align: center;
+            max-width: 600px;
+        }
+        .overlay-screen button {
+            background: #110d0b; border: 1px solid #8b0000; color: #e8e0d5;
+            padding: 15px 40px; font-family: 'Cinzel', serif; font-size: 18px;
+            font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .overlay-screen button:hover { background: #8b0000; box-shadow: 0 0 20px rgba(139,0,0,0.6); }
+
+        .ticker {
+            position: relative; z-index: 10; background: #8b0000; color: #0a0806;
+            padding: 12px 0; overflow: hidden; white-space: nowrap;
+            border-top: 1px solid #ff3333; border-bottom: 1px solid #ff3333; margin-top: 60px;
+        }
+        .ticker-content {
+            display: inline-block; animation: ticker 20s linear infinite;
+            font-family: 'Special Elite', monospace; font-size: 14px; font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase;
+        }
+        .ticker-item { display: inline-block; padding: 0 30px; }
+        .ticker-item::before { content: '⚠'; margin-right: 10px; }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .footer {
+            position: relative; z-index: 10; text-align: center; padding: 60px;
+            border-top: 1px solid rgba(168,155,140,0.08); background: #050403;
+        }
+        .footer-logo { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700; color: #e8e0d5; margin-bottom: 20px; }
+        .footer p { font-family: 'Special Elite', monospace; font-size: 12px; color: #5c4a3d; letter-spacing: 2px; }
+
+        @media (max-width: 1000px) {
+            .header { flex-direction: column; gap: 16px; padding: 20px; }
+            .nav { gap: 16px; flex-wrap: wrap; justify-content: center; }
+            .page-header h1 { font-size: 48px; }
+            .task-container { padding: 0 20px 60px; }
+            .back-btn { top: auto; bottom: 20px; left: 20px; width: 40px; height: 40px; font-size: 18px; }
+            .overlay-screen h2 { font-size: 40px; }
+            .controls-hint { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="game.html" class="back-btn" title="Назад к выбору игр"></a>
+
+    <header class="header">
+        <div class="logo">ДНЕВНИК<span>.</span>ВЫЖИВШЕГО</div>
+        <nav class="nav">
+            <a href="index.html">Главная</a>
+            <a href="bio.html">Хроники</a>
+            <a href="hobby.html">Реликвии</a>
+            <a href="dz.html">Задания JS</a>
+            <a href="game.html" class="active">Выживание</a>
+        </nav>
+    </header>
+
+    <header class="page-header">
+        <h1>Ремонт</h1>
+        <p>Восстановление цепи</p>
+    </header>
+
+    <div class="task-container">
+        
+        <div class="task-desc">
+            <h2>Протокол ремонта</h2>
+            <p>Проведи провод от источника питания (красный круг) к приёмнику (зелёный круг), обходя препятствия. Зажми <strong>ЛКМ</strong> и веди линию.</p>
+        </div>
+
+        <div class="terminal-panel">
+            <div class="terminal-header">
+                <span>Схема</span>
+                <span>Питание: 0%</span>
+            </div>
+            
+            <div class="game-container" id="gameContainer">
+                <canvas id="circuitCanvas"></canvas>
+                
+                <div class="game-ui">
+                    <div class="ui-item">УРОВЕНЬ: <span id="levelVal">1</span></div>
+                    <div class="ui-item">ЦЕПЬ: <span id="statusVal">РАЗОМКНУТА</span></div>
+                </div>
+
+                <div class="controls-hint">
+                    Зажми <strong>ЛКМ</strong> и веди провод.
+                </div>
+
+                <div class="overlay-screen" id="winScreen">
+                    <h2>ЦЕПЬ ЗАМКНУТА</h2>
+                    <p>Питание восстановлено. Система работает.</p>
+                    <button onclick="nextLevel()">СЛЕДУЮЩИЙ УРОВЕНЬ</button>
+                </div>
+
+                <div class="overlay-screen" id="failScreen">
+                    <h2>КОРОТКОЕ ЗАМЫКАНИЕ</h2>
+                    <p>Провод перегорел. Попробуй ещё раз.</p>
+                    <button onclick="resetLevel()">ПЕРЕЗАПУСК</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="ticker">
+        <div class="ticker-content">
+            <span class="ticker-item">Внимание: обнаружена активность в секторе 7</span>
+            <span class="ticker-item">Рекомендуется не отключать питание</span>
+            <span class="ticker-item">Уровень радиации в норме</span>
+            <span class="ticker-item">Найдена новая схема для пайки</span>
+            <span class="ticker-item">Изучен новый иероглиф</span>
+            <span class="ticker-item">Внимание: обнаружена активность в секторе 7</span>
+            <span class="ticker-item">Рекомендуется не отключать питание</span>
+            <span class="ticker-item">Уровень радиации в норме</span>
+            <span class="ticker-item">Найдена новая схема для пайки</span>
+            <span class="ticker-item">Изучен новый иероглиф</span>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-logo">ДНЕВНИК<span style="color:#8b0000">.</span>ВЫЖИВШЕГО</div>
+        <p>© 2026 // ВСЕ СИСТЕМЫ В НОРМЕ</p>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('circuitCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('gameContainer');
+        const levelVal = document.getElementById('levelVal');
+        const statusVal = document.getElementById('statusVal');
+        const winScreen = document.getElementById('winScreen');
+        const failScreen = document.getElementById('failScreen');
+
+        let width, height;
+        let level = 1;
+        let isDrawing = false;
+        let path = [];
+        let startNode = { x: 0, y: 0 };
+        let endNode = { x: 0, y: 0 };
+        let obstacles = [];
+        let isGameWon = false;
+        let isGameFailed = false;
+
+        // Функция для установки правильных размеров и запуска игры
+        function setupCanvas() {
+            width = container.clientWidth;
+            height = container.clientHeight;
+            
+            // Если ширина или высота равна 0 (глюк), ждем следующий кадр
+            if (width === 0 || height === 0) {
+                requestAnimationFrame(setupCanvas);
+                return;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Запускаем первый уровень только после установки размеров
+            initLevel();
+            draw(); // Запускаем цикл отрисовки
+        }
+
+        // Инициализация уровня
+        function initLevel() {
+            isGameWon = false;
+            isGameFailed = false;
+            path = [];
+            obstacles = [];
+            statusVal.textContent = 'РАЗОМКНУТА';
+            statusVal.style.color = '#8b0000';
+            levelVal.textContent = level;
+
+            winScreen.classList.remove('active');
+            failScreen.classList.remove('active');
+
+            // Старт слева по центру, финиш справа по центру
+            startNode = { x: 80, y: height / 2 };
+            endNode = { x: width - 80, y: height / 2 };
+
+            // Генерация препятствий
+            const obsCount = 3 + level * 2;
+            for (let i = 0; i < obsCount; i++) {
+                const obsW = 40 + Math.random() * 80;
+                const obsH = 40 + Math.random() * 100;
+                
+                // Размещаем препятствия только в центральной части, 
+                // чтобы не перекрывать старт и финиш
+                const obsX = 150 + Math.random() * (width - 300);
+                const obsY = Math.random() * (height - 150) + 25;
+
+                obstacles.push({ x: obsX, y: obsY, w: obsW, h: obsH });
+            }
+        }
+
+        // Рисование
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Фон
+            ctx.fillStyle = '#0a0806';
+            ctx.fillRect(0, 0, width, height);
+
+            // Дорожки (декор)
+            ctx.strokeStyle = 'rgba(60, 45, 35, 0.3)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < width; i += 40) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke();
+            }
+            for (let j = 0; j < height; j += 40) {
+                ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(width, j); ctx.stroke();
+            }
+
+            // Препятствия
+            obstacles.forEach(obs => {
+                ctx.fillStyle = '#1a1512';
+                ctx.strokeStyle = '#8b0000';
+                ctx.lineWidth = 2;
+                ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+                ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+                
+                ctx.fillStyle = '#3a2e26';
+                ctx.fillRect(obs.x + 5, obs.y + 5, obs.w - 10, obs.h - 10);
+            });
+
+            // Старт
+            ctx.fillStyle = '#ff0000';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#ff0000';
+            ctx.beginPath();
+            ctx.arc(startNode.x, startNode.y, 15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Финиш
+            ctx.fillStyle = '#00ff00';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#00ff00';
+            ctx.beginPath();
+            ctx.arc(endNode.x, endNode.y, 15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Провод
+            if (path.length > 0) {
+                ctx.strokeStyle = isGameFailed ? '#ff0000' : (isGameWon ? '#00ff00' : '#ffcc00');
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(path[0].x, path[0].y);
+                for (let i = 1; i < path.length; i++) {
+                    ctx.lineTo(path[i].x, path[i].y);
+                }
+                ctx.stroke();
+
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = isGameFailed ? '#ff0000' : (isGameWon ? '#00ff00' : '#ffcc00');
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        // Мышь
+        canvas.addEventListener('mousedown', (e) => {
+            if (isGameWon || isGameFailed) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const distToStart = Math.hypot(mouseX - startNode.x, mouseY - startNode.y);
+            if (distToStart < 30) {
+                isDrawing = true;
+                path = [{ x: mouseX, y: mouseY }];
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing || isGameWon || isGameFailed) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            // Проверка столкновения
+            let collision = false;
+            for (let obs of obstacles) {
+                if (mouseX > obs.x && mouseX < obs.x + obs.w &&
+                    mouseY > obs.y && mouseY < obs.y + obs.h) {
+                    collision = true;
+                    break;
+                }
+            }
+
+            if (collision) {
+                isGameFailed = true;
+                isDrawing = false;
+                statusVal.textContent = 'ЗАМЫКАНИЕ';
+                statusVal.style.color = '#ff0000';
+                failScreen.classList.add('active');
+                return;
+            }
+
+            const lastPoint = path[path.length - 1];
+            const dist = Math.hypot(mouseX - lastPoint.x, mouseY - lastPoint.y);
+            if (dist > 5) {
+                path.push({ x: mouseX, y: mouseY });
+            }
+
+            const distToEnd = Math.hypot(mouseX - endNode.x, mouseY - endNode.y);
+            if (distToEnd < 30) {
+                isGameWon = true;
+                isDrawing = false;
+                statusVal.textContent = 'ЗАМКНУТА';
+                statusVal.style.color = '#00ff00';
+                winScreen.classList.add('active');
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDrawing && !isGameWon && !isGameFailed) {
+                path = []; // Сброс, если не довели
+            }
+            isDrawing = false;
+        });
+
+        function nextLevel() {
+            level++;
+            initLevel();
+        }
+
+        function resetLevel() {
+            initLevel();
+        }
+
+        // Ждём полной загрузки страницы, и только потом запускаем игру
+        window.addEventListener('load', setupCanvas);
+
+    </script>
+
+</body>
+</html>
